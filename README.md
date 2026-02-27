@@ -1,6 +1,6 @@
 # obs-interact-click
 
-Automates clicking inside an OBS browser source by opening the Interact window and sending a programmatic mouse click. Close the Interact window from an Elgato Stream Deck button using a companion bash script.
+Automates clicking inside an OBS browser source by opening the Interact window and sending a programmatic mouse click. Close the Interact window from an Elgato Stream Deck button using a companion bash script (mac specific). Main idea is to automate clicking on the spinwheel from a site like [wheeldecide.com](https://wheeldecide.com)
 
 ## Files
 
@@ -8,6 +8,8 @@ Automates clicking inside an OBS browser source by opening the Interact window a
 |---|---|
 | `obs-interact-click.lua` | OBS Lua script — opens Interact window and sends a click |
 | `obs-interact-close.sh` | Bash script — closes the Interact window via AppleScript |
+
+![OBS Interact window open for a browser source](example.png)
 
 ---
 
