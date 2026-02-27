@@ -1,10 +1,10 @@
 # obs-interact-click
 
-An OBS Studio Lua script for automating interact/click behavior in OBS.
+Automates clicking inside an OBS browser source by opening the Interact window and sending a programmatic mouse click. Designed for use with an Elgato Stream Deck (macOS). Primary use case: spin a wheel on a site like wheeldecide.com without touching the mouse.
 
 ## Project Overview
 
-This is an OBS Studio script written in Lua. It hooks into OBS's scripting API to provide automated interaction or click functionality within OBS scenes/sources.
+Two-part tool: a Lua script loaded into OBS that opens the Interact window and sends a click, and a companion bash script (AppleScript-based) that closes the Interact window. Both are triggered from Stream Deck buttons.
 
 ## Tech Stack
 
@@ -43,7 +43,10 @@ local obs = obslua
 ```
 obs-interact-click/
 ├── CLAUDE.md
-└── obs-interact-click.lua   # Main script file (loaded by OBS)
+├── README.md
+├── example.png                  # Screenshot showing the Interact window open in OBS
+├── obs-interact-click.lua       # OBS Lua script — opens Interact window and sends a click
+└── obs-interact-close.sh        # Bash script — closes the Interact window via AppleScript (macOS only)
 ```
 
 ## Development Workflow
