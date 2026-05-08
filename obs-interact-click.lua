@@ -38,6 +38,9 @@ local function interact()
     end
     obs.obs_frontend_open_source_interaction(source)
     obs.obs_source_release(source)
+    -- Bring OBS to the foreground so the Interact window receives input
+    -- regardless of which dock or external app was previously focused.
+    os.execute([[osascript -e 'tell application "OBS" to activate']])
     obs.timer_add(on_click_timer, 200)
 end
 
