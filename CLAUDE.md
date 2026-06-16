@@ -4,13 +4,14 @@ Automates clicking inside an OBS browser source by opening the Interact window a
 
 ## Project Overview
 
-Two-part tool: a Lua script loaded into OBS that opens the Interact window and sends a click, and a companion bash script (AppleScript-based) that closes the Interact window. Both are triggered from Stream Deck buttons.
+Multi-part tool: a Lua script loaded into OBS that opens the Interact window and sends a click, a companion bash script (AppleScript-based) that closes the Interact window, and a Node script that triggers the click hotkey over obs-websocket (so it works regardless of OS keyboard focus). All are triggered from Stream Deck buttons.
 
 ## Tech Stack
 
 - **Language**: Lua 5.1 (OBS embeds LuaJIT / Lua 5.1)
 - **Runtime**: OBS Studio scripting engine
 - **APIs**: OBS Lua scripting API (`obslua` / `obs` module)
+- **WebSocket trigger**: Node.js 22+ (`obs-interact-trigger.mjs`), zero npm deps — uses the native `WebSocket` global and the [obs-websocket v5 protocol](https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md) `TriggerHotkeyByName` request
 
 ## OBS Lua Scripting Basics
 
@@ -44,9 +45,11 @@ local obs = obslua
 obs-interact-click/
 ├── CLAUDE.md
 ├── README.md
-├── example.png                  # Screenshot showing the Interact window open in OBS
-├── obs-interact-click.lua       # OBS Lua script — opens Interact window and sends a click
-└── obs-interact-close.sh        # Bash script — closes the Interact window via AppleScript (macOS only)
+├── example.png                     # Screenshot showing the Interact window open in OBS
+├── obs-interact-click.lua          # OBS Lua script — opens Interact window and sends a click
+├── obs-interact-close.command      # Bash script — closes the Interact window via AppleScript (macOS only)
+├── obs-interact-trigger.mjs        # Node script — triggers the click hotkey over obs-websocket
+└── obs-interact-trigger.command    # Stream Deck "Open" entry point for obs-interact-trigger.mjs
 ```
 
 ## Development Workflow
