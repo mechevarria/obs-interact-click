@@ -1,12 +1,11 @@
 #!/bin/bash
-# obs-interact-close.sh
+# obs-interact-close.command
 #
 # Closes the OBS "Interact" window for a browser source.
 #
 # Stream Deck setup:
-#   1. chmod +x obs-interact-close.sh
-#   2. Rename to obs-interact-close.command (Terminal will execute .command files directly)
-#   3. In Stream Deck: add an "Open" action and point it at obs-interact-close.command
+#   1. chmod +x obs-interact-close.command
+#   2. In Stream Deck: add an "Open" action and point it at this file
 #
 
 osascript <<EOF
@@ -21,3 +20,8 @@ tell application "System Events"
     end tell
 end tell
 EOF
+
+# Opening a .command file always launches Terminal — close this window
+# immediately so it doesn't linger on screen after closing Interact.
+osascript -e 'tell application "Terminal" to close (first window whose tty is "'"$(tty)"'")' >/dev/null 2>&1 &
+exit 0
