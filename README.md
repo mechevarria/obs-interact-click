@@ -1,15 +1,13 @@
 # obs-interact-click
 
-Automates clicking inside an OBS browser source by opening the Interact window and sending a programmatic mouse click. Close the Interact window from an Elgato Stream Deck button using a companion bash script (mac specific). Main idea is to automate clicking on the spinwheel from a site like [wheeldecide.com](https://wheeldecide.com)
+Automates clicking inside an OBS browser source by opening the Interact window and sending a programmatic mouse click. Close the Interact window from an Elgato Stream Deck button using a companion Automator app (macOS). Main idea is to automate clicking on the spinwheel from a site like [wheeldecide.com](https://wheeldecide.com)
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `obs-interact-click.lua` | OBS Lua script — opens Interact window and sends a click |
-| `obs-interact-close.command` | Bash script — closes the Interact window via AppleScript |
 | `obs-interact-trigger.mjs` | Node script — triggers the click hotkey over obs-websocket (no OBS focus required) |
-| `obs-interact-trigger.command` | Stream Deck entry point for `obs-interact-trigger.mjs` |
 
 ![OBS Interact window open for a browser source](example.png)
 
@@ -63,49 +61,69 @@ Triggers the `obs_interact_click` action registered by `obs-interact-click.lua` 
 - Check **Enable WebSocket server**, note the port (default `4455`)
 - A password is generated automatically — `obs-interact-trigger.mjs` reads it directly from OBS's own config file (`~/Library/Application Support/obs-studio/plugin_config/obs-websocket/config.json`), so it never needs to be copied anywhere
 
-**2. Make the wrapper executable**
+**2. Create an Automator Application**
 
-```bash
-chmod +x obs-interact-trigger.command obs-interact-trigger.mjs
-```
+1. Open **Automator** (`/Applications/Automator.app`)
+2. **File > New**, choose **Application**
+3. In the action library, search for `Run Shell Script` and drag it into the workflow
+4. Set **Shell** to `/bin/zsh` and **Pass input** to `to stdin`
+5. Replace the default script body with:
+   ```sh
+   /opt/homebrew/bin/node "/full/path/to/obs-interact-trigger.mjs"
+   ```
+   Replace `/full/path/to/` with the actual absolute path to this repo.
+6. **File > Save** — name it e.g. `OBS Interact Trigger` and save it to the repo folder or `~/Applications/`
 
 **3. Add to Stream Deck**
 
 - In the Stream Deck app, add an **Open** action to a button
-- Set the file path to `obs-interact-trigger.command`
+- Set the file path to the `.app` you saved above
 
 No OBS Settings configuration is needed for this path — the script calls the action directly by its registered name (`obs_interact_click`, set in `obs-interact-click.lua`).
 
 ---
 
-## Part 2 — Close Script (`obs-interact-close.command`)
+## Part 2 — Close Script
 
 ### What it does
 
-Finds the OBS Interact window (any window whose title starts with `"Interacting with "`) and clicks its close button using macOS Accessibility APIs via AppleScript. Closes its own Terminal window immediately afterward so it doesn't linger on screen.
-
-> macOS only. Requires Accessibility permission for Terminal (or whichever app runs the script).
+Finds the OBS Interact window (any window whose title starts with `"Interacting with "`) and clicks its close button using macOS Accessibility APIs via AppleScript.
 
 ### Setup
 
-**1. Make the script executable**
+**1. Create an Automator Application**
 
-```bash
-chmod +x obs-interact-close.command
-```
+1. Open **Automator** (`/Applications/Automator.app`)
+2. **File > New**, choose **Application**
+3. In the action library, search for `Run Shell Script` and drag it into the workflow
+4. Set **Shell** to `/bin/zsh` and **Pass input** to `to stdin`
+5. Replace the default script body with:
+   ```sh
+   osascript <<'SCRIPT'
+   tell application "System Events"
+       tell process "OBS"
+           repeat with w in windows
+               if name of w starts with "Interacting with " then
+                   click button 1 of w
+                   exit repeat
+               end if
+           end repeat
+       end tell
+   end tell
+   SCRIPT
+   ```
+6. **File > Save** — name it e.g. `OBS Interact Close` and save it to the repo folder or `~/Applications/`
 
 **2. Grant Accessibility permission**
 
-The first time the script runs, macOS will prompt to grant Accessibility access to Terminal (or Script Editor). Approve it under:
+The AppleScript in this app needs Accessibility access to click the OBS window. Open **System Settings > Privacy & Security > Accessibility**, click **+**, and add the `.app` you saved above.
 
-**System Settings > Privacy & Security > Accessibility**
-
-> **Troubleshooting:** If you see `osascript is not allowed assistive access. (-25211)`, macOS didn't prompt automatically (or the grant got reset, e.g. after a Terminal update). Open the Accessibility pane above and check whether **Terminal** is listed and toggled on — if it's missing, click **+** and add `/Applications/Utilities/Terminal.app`. If Stream Deck launches the script without spawning a visible Terminal, add **Stream Deck** to the list too. Restart Terminal after granting access.
+> **Troubleshooting:** If you see `osascript is not allowed assistive access. (-25211)`, the app is missing from the Accessibility list — add it as described above. Note that saving a new version of the Automator app may revoke the grant; re-add it if the error reappears.
 
 **3. Add to Stream Deck**
 
 - In the Stream Deck app, add an **Open** action to a button
-- Set the file path to `obs-interact-close.command`
+- Set the file path to the `.app` you saved above
 
 ---
 
@@ -113,7 +131,7 @@ The first time the script runs, macOS will prompt to grant Accessibility access 
 
 | Step | Action | How |
 |---|---|---|
-| 1 | Trigger interact & click | Stream Deck button → `obs-interact-trigger.command` → websocket → `obs-interact-click.lua` |
+| 1 | Trigger interact & click | Stream Deck button → Automator app → `obs-interact-trigger.mjs` → websocket → `obs-interact-click.lua` |
 | 2 | OBS opens Interact window | Automatic |
 | 3 | Script clicks browser source | Automatic (200 ms after window opens) |
-| 4 | Close Interact window | Stream Deck button → `obs-interact-close.command` |
+| 4 | Close Interact window | Stream Deck button → Automator app → AppleScript closes OBS Interact window |
