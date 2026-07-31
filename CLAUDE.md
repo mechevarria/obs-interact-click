@@ -4,7 +4,7 @@ Automates clicking inside an OBS browser source by opening the Interact window a
 
 ## Project Overview
 
-Multi-part tool: a Lua script loaded into OBS that opens the Interact window and sends a click, a companion bash script (AppleScript-based) that closes the Interact window, and a Node script that triggers the click hotkey over obs-websocket (so it works regardless of OS keyboard focus). All are triggered from Stream Deck buttons.
+Multi-part tool: a Lua script loaded into OBS that opens the Interact window and sends a click, a Node script that triggers the click hotkey over obs-websocket (so it works regardless of OS keyboard focus), and an AppleScript snippet that closes the Interact window. The Node script and AppleScript snippet are each wrapped in a local Automator `.app` (built per the README, not tracked in this repo) so they can be launched from Stream Deck via an **Open** action.
 
 ## Tech Stack
 
@@ -45,12 +45,16 @@ local obs = obslua
 obs-interact-click/
 ├── CLAUDE.md
 ├── README.md
-├── example.png                     # Screenshot showing the Interact window open in OBS
 ├── obs-interact-click.lua          # OBS Lua script — opens Interact window and sends a click
-├── obs-interact-close.command      # Bash script — closes the Interact window via AppleScript (macOS only)
 ├── obs-interact-trigger.mjs        # Node script — triggers the click hotkey over obs-websocket
-└── obs-interact-trigger.command    # Stream Deck "Open" entry point for obs-interact-trigger.mjs
+└── screenshots/
+    ├── example.png                 # Interact window open in OBS
+    ├── install-node-screenshot.png # nvm-based Node.js install (nodejs.org/en/download)
+    ├── obs-trigger-screenshot.png  # Automator "OBS Interact Trigger" Run Shell Script action
+    └── obs-close-screenshot.png    # Automator "OBS Interact Close" Run Shell Script action
 ```
+
+The AppleScript-based close action and the Node trigger's shell wrapper live only inside their respective Automator `.app` bundles (see README) — there are no `.command` files in this repo.
 
 ## Development Workflow
 
