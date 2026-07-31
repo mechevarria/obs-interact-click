@@ -9,19 +9,11 @@ Automates clicking inside an OBS browser source by opening the Interact window a
 | `obs-interact-click.lua` | OBS Lua script — opens the Interact window and sends a click |
 | `obs-interact-trigger.mjs` | Node script — triggers the click hotkey over obs-websocket |
 
-![OBS Interact window open for a browser source](example.png)
+![OBS Interact window open for a browser source](screenshots/example.png)
 
 ---
 
 ## Part 1 — OBS Lua Script
-
-### What it does
-
-1. Opens the OBS Interact window for a selected browser source
-2. Waits 200 ms for the window to appear
-3. Sends a left mouse click at the configured (X, Y) coordinates within the browser source
-
-### Setup
 
 1. Open OBS → **Tools > Scripts**, click **+**, and select `obs-interact-click.lua`
 2. In the Scripts panel, configure:
@@ -34,16 +26,19 @@ Automates clicking inside an OBS browser source by opening the Interact window a
 
 ## Part 1b — Stream Deck Trigger (WebSocket)
 
-### What it does
-
 Runs `obs-interact-trigger.mjs` via Node.js, which sends a `TriggerHotkeyByName` request over [obs-websocket](https://github.com/obsproject/obs-websocket) (built into OBS 28+). This bypasses OS-level keyboard focus — the click fires regardless of which app is active.
 
-### Dependencies
+### Install Node.js
 
-- **Node.js 22+** — uses the native `WebSocket` global, no npm packages required:
-  ```bash
-  brew install node
-  ```
+Install via [nvm](https://nodejs.org/en/download), so Automator keeps working across Node version upgrades instead of pointing at a hardcoded binary path:
+
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
+\. "$HOME/.nvm/nvm.sh"
+nvm install 24
+```
+
+![Node.js download page showing the nvm install commands](screenshots/install-node-screenshot.png)
 
 ### Setup
 
@@ -61,9 +56,14 @@ Runs `obs-interact-trigger.mjs` via Node.js, which sends a `TriggerHotkeyByName`
 4. Set **Shell** to `/bin/zsh`, **Pass input** to `to stdin`
 5. Replace the default script body with the following, substituting the actual path to this repo:
    ```sh
-   /opt/homebrew/bin/node "/Users/yourname/git/obs-interact-click/obs-interact-trigger.mjs"
+   export NVM_DIR="$HOME/.nvm"
+   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+   node "$HOME/git/obs-interact-click/obs-interact-trigger.mjs"
    ```
 6. **File > Save** — name it `OBS Interact Trigger` and save it anywhere convenient (e.g. `~/Applications/`)
+
+![Automator Run Shell Script action configured for OBS Interact Trigger](screenshots/obs-trigger-screenshot.png)
 
 **Add to Stream Deck**
 
@@ -73,8 +73,6 @@ Runs `obs-interact-trigger.mjs` via Node.js, which sends a `TriggerHotkeyByName`
 ---
 
 ## Part 2 — Stream Deck Close Button
-
-### What it does
 
 Finds the OBS Interact window (any window titled `"Interacting with …"`) and closes it using macOS Accessibility APIs via AppleScript.
 
@@ -103,6 +101,8 @@ Finds the OBS Interact window (any window titled `"Interacting with …"`) and c
    ```
 6. **File > Save** — name it `OBS Interact Close` and save it anywhere convenient (e.g. `~/Applications/`)
 
+![Automator Run Shell Script action configured for OBS Interact Close](screenshots/obs-close-screenshot.png)
+
 **Grant Accessibility permission**
 
 The AppleScript needs permission to control OBS window buttons.
@@ -116,14 +116,3 @@ The AppleScript needs permission to control OBS window buttons.
 
 - Add an **Open** action to a button
 - Set the path to the `OBS Interact Close.app` you saved above
-
----
-
-## Typical Workflow
-
-| Step | Action | How |
-|---|---|---|
-| 1 | Trigger click | Stream Deck → `OBS Interact Trigger.app` → obs-websocket → `obs-interact-click.lua` |
-| 2 | OBS opens Interact window | Automatic |
-| 3 | Script clicks browser source | Automatic (200 ms after window opens) |
-| 4 | Close Interact window | Stream Deck → `OBS Interact Close.app` → AppleScript |
